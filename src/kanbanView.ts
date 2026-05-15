@@ -1648,6 +1648,17 @@ export class KanbanView extends BasesView {
 					}
 				}
 			});
+
+			// Append status change timestamp to file body
+			if (oldColumnValue && oldColumnValue !== newColumnValue) {
+				const now = new Date();
+				const pad = (n: number): string => String(n).padStart(2, '0');
+				const timestamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+				const fromLabel = oldColumnValue === UNCATEGORIZED_LABEL ? 'Uncategorized' : oldColumnValue;
+				const toLabel = newColumnValue === UNCATEGORIZED_LABEL ? 'Uncategorized' : newColumnValue;
+				const statusLine = `${timestamp} From ${fromLabel} to ${toLabel}`;
+				await this.app.vault.process(entry.file, (content: string) => content + '\n' + statusLine);
+			}
 		} catch (error) {
 			console.error('Error updating entry property:', error);
 			this.render();
